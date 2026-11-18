@@ -15,7 +15,7 @@ This Privacy Policy outlines the rules for the collection, processing, storage, 
 The system collects only the data strictly necessary for the editor's operation. We do not collect usage telemetry or user location data.
 
 ## 5. Data Protection and Storage
-- User passwords are **not stored in plain text**. Irreversible hashing (e.g., BCrypt/SHA256 algorithms) is used.
+- User passwords are not stored in plain text. Irreversible hashing using the BCrypt algorithm with a unique salt is applied
 - All data is stored in a relational database (MySQL). Access to the database is restricted to authorized administrators only.
 
 ## 6. Data Deletion
