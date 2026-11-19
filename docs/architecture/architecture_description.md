@@ -20,3 +20,12 @@ Data integrity is verified for user drafts and notes (`BookElement` model). Sinc
   - **Server Side (ASP.NET Core Web API):** Acts as the single source of truth. Handles database access (MySQL), AES-GCM encryption/decryption, input validation, and all authorization checks.
 - **Network Authentication & Session State:** Stateless token-based authentication delegated to **Firebase Auth**. After login, the client receives a signed **JWT (JSON Web Token)** and attaches it to every API request via the `Authorization: Bearer <token>` HTTP header over HTTPS (TLS).
 - **Server-Side Authorization:** On every protected endpoint, the ASP.NET Core middleware validates the JWT signature, expiration (`exp`), and issuer. The `UserId` is extracted exclusively from the verified token claims (never trusted from the request body) to enforce **Discretionary Access Control (DAC)**, ensuring users can only read or modify their own `BookElement` resources.
+
+## 5. Logging, Monitoring, Backup, and Disaster Recovery
+- **Structured Logging:** Backend services emit structured JSON logs with UTC ISO-8601 timestamps, severity levels (`INFO`, `WARNING`, `ERROR`, `CRITICAL`), component name, `request_id` for correlation, `user_id`, client IP, action, and result.
+- **Logged Events & Data Sanitization:** Logs cover authentication (success/failure), access denials, CRUD operations on `BookElement`, database errors, and backup/recovery events. Passwords, JWT tokens, and encryption keys are strictly masked (`***REDACTED***`) before writing. Log rotation is configured by size/age with a 30-day retention policy.
+- **Monitoring:** Key metrics include failed login rate per IP (brute-force threshold alert), HTTP 5xx error rate, API latency, and DB availability.
+- **Backup Strategy (3-2-1 Principle):**
+  - *Critical Data:* Production database (`MySQL` / `BookElements`, user metadata), server configuration, and encryption keys (stored separately in a secure vault). Caches and build artifacts are excluded.
+  - *Schedule & Type:* Daily full backups + hourly incremental backups; stored in an isolated off-site cloud storage with 14-day retention.
+  - *Integrity & Objectives:* Every backup is verified via **SHA-256** checksums and periodic test restores. Target **RPO = 1 hour**, **RTO = 30 minutes**.
